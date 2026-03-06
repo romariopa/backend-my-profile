@@ -47,10 +47,15 @@ app.get('/api/hello', (req, res) => {
 
 // Endpoint para recibir el formulario de contacto
 app.post('/api/contact', async (req, res) => {
-    const { nombre, email, descripcion } = req.body;
+    // Permitir ambos formatos: {nombre, descripcion} (actual) o {name, message} (nuevo)
+    const { nombre, name, email, descripcion, message } = req.body;
+    
+    // Normalizar datos
+    const finalName = nombre || name;
+    const finalMessage = descripcion || message;
 
     // Validación básica
-    if (!nombre || !email || !descripcion) {
+    if (!finalName || !email || !finalMessage) {
         return res.status(400).json({
             success: false,
             message: 'Todos los campos son obligatorios'
@@ -77,12 +82,12 @@ app.post('/api/contact', async (req, res) => {
         });
     }
 
-    const message = `
+    const telegramMessage = `
 Nuevo formulario recibido:
 
-Nombre: ${nombre}
+Nombre: ${finalName}
 Email: ${email}
-Descripción: ${descripcion}
+Descripción: ${finalMessage}
     `;
 
     try {
@@ -90,7 +95,7 @@ Descripción: ${descripcion}
 
         await axios.post(telegramUrl, {
             chat_id: chatId,
-            text: message
+            text: telegramMessage
         });
 
         console.log('Mensaje enviado a Telegram exitosamente');
