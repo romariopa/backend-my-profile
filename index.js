@@ -9,39 +9,44 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 // Configurar CORS siguiendo buenas prácticas
 const allowedOrigins = [
-    'https://romarioparra.co'
-    // Agregar más dominios aquí si es necesario, ej: 'http://localhost:3000'
+    'https://romarioparra.co',
+    'https://www.romarioparra.co',
+    'http://localhost:5173', // Para desarrollo local
+    'http://localhost:3000'
 ];
 
 const corsOptions = {
     origin: (origin, callback) => {
-        // Bloquear peticiones sin origin (más estricto)
-        if (!origin) {
-            return callback(new Error('Bloqueado por CORS: Petición sin origen'), false);
-        }
+        // Permitir peticiones sin origen (como curl o Postman) para facilitar pruebas, 
+        // o si es necesario, bloquearlas en producción estricta.
+        if (!origin) return callback(null, true);
 
-        if (allowedOrigins.includes(origin)) {
-            return callback(null, true);
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
         } else {
-            return callback(new Error('Bloqueado por CORS: Origen no permitido'), false);
+            callback(new Error('Not allowed by CORS'));
         }
     },
-    methods: ['GET', 'POST'], // Limitar métodos permitidos si es necesario
-    credentials: true // Si se necesitan cookies o headers de autorización
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin'],
+    credentials: true,
+    optionsSuccessStatus: 200
 };
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
 // Endpoint público para verificar el estado de la API (Hello World)
-app.get('/api/hello', cors(), (req, res) => {
+app.get('/api/hello', (req, res) => {
     res.status(200).json({ 
         success: true, 
         message: 'Hello World! La API está funcionando correctamente 🚀' 
     });
 });
 
-// Endpoint para recibir el formulario de contacto (CORS Estricto)
-app.post('/api/contact', cors(corsOptions), async (req, res) => {
+// Endpoint para recibir el formulario de contacto
+app.post('/api/contact', async (req, res) => {
     const { nombre, email, descripcion } = req.body;
 
     // Validación básica
