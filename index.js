@@ -75,7 +75,6 @@ app.post('/api/contact', async (req, res) => {
     const chatId = process.env.TELEGRAM_CHAT_ID;
 
     if (!botToken || !chatId) {
-        console.error('Faltan las variables de entorno de Telegram');
         return res.status(500).json({
             success: false,
             message: 'Error de configuración del servidor'
@@ -98,11 +97,9 @@ Descripción: ${finalMessage}
             text: telegramMessage
         });
 
-        console.log('Mensaje enviado a Telegram exitosamente');
         res.status(200).json({ success: true, message: 'Mensaje enviado correctamente' });
 
     } catch (error) {
-        console.error('Error al enviar mensaje a Telegram:', error.response ? error.response.data : error.message);
         res.status(500).json({
             success: false,
             message: 'Error al enviar el mensaje'
@@ -116,5 +113,4 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
