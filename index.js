@@ -30,11 +30,18 @@ const corsOptions = {
     credentials: true // Si se necesitan cookies o headers de autorización
 };
 
-app.use(cors(corsOptions));
 app.use(express.json());
 
-// Endpoint para recibir el formulario de contacto
-app.post('/api/contact', async (req, res) => {
+// Endpoint público para verificar el estado de la API (Hello World)
+app.get('/api/hello', cors(), (req, res) => {
+    res.status(200).json({ 
+        success: true, 
+        message: 'Hello World! La API está funcionando correctamente 🚀' 
+    });
+});
+
+// Endpoint para recibir el formulario de contacto (CORS Estricto)
+app.post('/api/contact', cors(corsOptions), async (req, res) => {
     const { nombre, email, descripcion } = req.body;
 
     // Validación básica
